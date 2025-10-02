@@ -2,7 +2,7 @@ name: Update PR Count
 
 on:
   schedule:
-    - cron: '0 0 * * *'   # runs daily at midnight UTC
+    - cron: '0 0 * * *'   # runs daily at midnight
   workflow_dispatch:
 
 jobs:
@@ -12,15 +12,15 @@ jobs:
       contents: write
 
     steps:
-      - name: Checkout Repo
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Get merged PR count
         env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          COUNT=$(gh api search/issues -q 'total_count' \
-            -f q='author:shalmontitree is:pr is:merged')
+          COUNT=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/search/issues?q=author:shalmontitree+is:pr+is:merged" \
+            | jq '.total_count')
           echo "PR_COUNT=$COUNT" >> $GITHUB_ENV
 
       - name: Update README
